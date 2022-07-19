@@ -12,49 +12,23 @@
 (defn read-stdin []
   (slurp *in*))
 
-
-(def open-action (action
-                  :handler (fn [e] (alert "I should open a new something."))
-                  :name "Open ..."
-                  :key  "menu O"
-                  :tip  "Open a new something something."))
-(def exit-action (action
-                  :handler (fn [e] (.dispose (to-frame e)))
-                  :name "Exit"
-                  :tip  "Close this window"))
-
-(def my-panel (vertical-panel
-               :items ["Label" 
-                       (action :handler (fn [e] (alert "Hello!")) :name "Button")
-                       open-action
-                       exit-action
-                       "Another label"]))
-
 (def f (frame :title "html 2 hiccup"))
 
 (defn display [content]
   (config! f :content content)
   content)
 
-(def area (s/text :multi-line? true 
-                  :font "MONOSPACED-PLAIN-14"
-                  :text "This is a text area
-                         it 
-                         is 
-                         multilined"))
 
 (def available-syntaxes
   {:html    RSyntaxTextArea/SYNTAX_STYLE_HTML
    :clojure RSyntaxTextArea/SYNTAX_STYLE_CLOJURE})
 
 (defn create-syntax-area [syntax]
-  (let [area (doto (RSyntaxTextArea. 20 60)
-               (.setSyntaxEditingStyle (get available-syntaxes syntax))
-               (.setCodeFoldingEnabled true)
-               (.setAutoIndentEnabled true)
-               (.setLineWrap true))]
-    area))
-
+  (doto (RSyntaxTextArea. 20 60)
+    (.setSyntaxEditingStyle (get available-syntaxes syntax))
+    (.setCodeFoldingEnabled true)
+    (.setAutoIndentEnabled true)
+    (.setLineWrap true)))
 
 (def html-area (create-syntax-area :html))
 

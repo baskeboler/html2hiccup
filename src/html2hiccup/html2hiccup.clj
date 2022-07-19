@@ -36,7 +36,7 @@
  
 (defn code-pane [title area]
   (s/vertical-panel 
-   :items [(s/la)title (RTextScrollPane. area)]))
+   :items [title (RTextScrollPane. area)]))
 
 (def html-clojure-split-area 
   (s/top-bottom-split (code-pane "html" html-area)

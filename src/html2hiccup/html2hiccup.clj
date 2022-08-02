@@ -36,15 +36,21 @@
  
 (defn code-pane [title area]
   (s/vertical-panel 
-   :items [title (RTextScrollPane. area)]))
+   :items [(RTextScrollPane. area)]
+   :border [5 title 10]))
+
+
 
 (def html-clojure-split-area 
   (s/top-bottom-split (code-pane "html" html-area)
                       (code-pane "hiccup" clojure-area)
                       :divider-location 1/3))
 
+(def line-break "
+")
+
 (defn code-handler [e]
-  (let [t  (-> e .getSource (config :text))
+  (let [t  (-> e .getSource (config :text) string/trim)
         converted (-> t
                       h/parse-fragment
                       first
@@ -54,6 +60,10 @@
     (println "selection: " t)
     (println "converted: " converted)
     (-> clojure-area (.setText converted))))
+
+;; convert hiccup vector into pretty printed string, unescape line breaks
+(defn as-str [hiccup-vec])
+
 
 (s/listen html-area
           :selection

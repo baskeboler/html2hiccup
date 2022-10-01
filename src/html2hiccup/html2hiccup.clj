@@ -58,13 +58,17 @@
                     :border (sb/line-border  :color :red))
            (RTextScrollPane. area)]))
 
+
 (def html-clojure-split-area 
   (s/top-bottom-split (code-pane "html" html-area)
                       (code-pane "hiccup" clojure-area)
                       :divider-location 1/3))
 
+(def line-break "
+")
+
 (defn code-handler [e]
-  (let [t  (-> e .getSource (config :text))
+  (let [t  (-> e .getSource (config :text) string/trim)
         converted (-> t
                       html->hiccup
                       first 
@@ -87,6 +91,7 @@
 (defn clear-html []
   (-> html-area 
       (.setText "")))
+
 
 (s/listen html-area
           :selection

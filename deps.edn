@@ -1,8 +1,8 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
-        hickory/hickory {:mvn/version "0.7.1"}
         seesaw/seesaw {:mvn/version "1.5.0"}
-        com.fifesoft/rsyntaxtextarea {:mvn/version "3.2.0"}}
+        com.fifesoft/rsyntaxtextarea {:mvn/version "3.2.0"}
+        taipei.404/html-to-hiccup {:mvn/version "0.1.8"}}
  :aliases
  {:run-m {:main-opts ["-m" "html2hiccup.html2hiccup"]}
   :run-x {:ns-default html2hiccup.html2hiccup

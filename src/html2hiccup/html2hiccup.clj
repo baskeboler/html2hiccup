@@ -1,21 +1,36 @@
 (ns html2hiccup.html2hiccup
-  (:require [clojure.string :as string]
-            [hickory.core :as h]
-            [seesaw.core :as s :refer [action alert config config! frame pack!
-                                       show! to-frame vertical-panel]])
+  (:require [seesaw.border :as sb]
+            [seesaw.core :as s :refer [config config! frame menu menu-item
+                                       menubar pack! separator show!
+                                       vertical-panel]]
+            [taipei-404.html :refer [html->hiccup minify-hiccup]]
+            [clojure.pprint :as pprint])
   (:import [org.fife.ui.rsyntaxtextarea RSyntaxTextArea]
            [org.fife.ui.rtextarea RTextScrollPane])
   (:gen-class))
+
+(declare clear-html clear-result)
 
 (s/native!)
 
 (defn read-stdin []
   (slurp *in*))
 
-(def f (frame :title "html 2 hiccup"))
+(def f (frame :title "html 2 hiccup"
+              :menubar (menubar :items [(menu :text "File"
+                                              :items [(menu-item :text "Open")
+                                                      (separator)
+                                                      (menu-item :text "Exit")])
+                                        (menu :text "Edit"
+                                              :items [(menu-item :text "Clear HTML"
+                                                                 :listen [:action #(clear-html)])
+                                                      (menu-item :text "Clear Result"
+                                                                 :listen [:action #(clear-result)])])])))
 
 (defn display [content]
-  (config! f :content content)
+  (config! f 
+           :content content
+           :on-close :exit)
   content)
 
 
@@ -23,20 +38,25 @@
   {:html    RSyntaxTextArea/SYNTAX_STYLE_HTML
    :clojure RSyntaxTextArea/SYNTAX_STYLE_CLOJURE})
 
-(defn create-syntax-area [syntax]
+(defn syntax-area [syntax]
   (doto (RSyntaxTextArea. 20 60)
     (.setSyntaxEditingStyle (get available-syntaxes syntax))
     (.setCodeFoldingEnabled true)
     (.setAutoIndentEnabled true)
     (.setLineWrap true)))
 
-(def html-area (create-syntax-area :html))
+(def html-area (syntax-area :html))
 
-(def clojure-area (create-syntax-area :clojure))
+(def clojure-area (syntax-area :clojure))
  
 (defn code-pane [title area]
   (s/vertical-panel 
-   :items [title (RTextScrollPane. area)]))
+   :items [(s/label :text title
+                    :h-text-position :center
+                    :font "ARIAL-BOLD-24"
+                    :halign :left
+                    :border (sb/line-border  :color :red))
+           (RTextScrollPane. area)]))
 
 (def html-clojure-split-area 
   (s/top-bottom-split (code-pane "html" html-area)
@@ -46,14 +66,27 @@
 (defn code-handler [e]
   (let [t  (-> e .getSource (config :text))
         converted (-> t
-                      h/parse-fragment
-                      first
-                      h/as-hiccup
-                      str
-                      (string/replace #"\"\\n+ *\"" ""))]
+                      html->hiccup
+                      first 
+                      minify-hiccup
+                      (clojure.pprint/write :stream nil)
+                      ;; h/parse-fragment
+                      ;; first
+                      ;; h/as-hiccup
+                      ;; str
+                      ;; (string/replace #"\"\\n+ *\"" "")
+                      ;; str
+                      )]
     (println "selection: " t)
     (println "converted: " converted)
     (-> clojure-area (.setText converted))))
+
+(defn clear-result [] 
+  (-> clojure-area (.setText "")))
+
+(defn clear-html []
+  (-> html-area 
+      (.setText "")))
 
 (s/listen html-area
           :selection
@@ -77,3 +110,10 @@
          (drop-while #(not= :html (first %)))
          first
          pp/pprint)))
+
+(comment 
+  (gui)
+  
+  
+  (seesaw.core/dispose! f)
+  )

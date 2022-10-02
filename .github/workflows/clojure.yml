@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      with:
+        versionSpec: '5.x'
     - uses: actions/checkout@v3
       with: 
         fetch-depth: 0
@@ -21,12 +25,6 @@ jobs:
         cli: latest
         # Set to `true` to fix problems realted to wrongly populated tool cache
         invalidate-cache: true
-    - name: Run CI
-      run: clojure -T:build ci
-    - name: Git Version
-      # You may pin to the exact commit or the version.
-      # uses: codacy/git-version@fa06788276d7492a2af01662649696d249ecf4cb
-      uses: codacy/git-version@2.4.0
     - name: Cache maven project dependencies
       uses: actions/cache@v3
       with:
@@ -34,3 +32,7 @@ jobs:
         key: ${{ runner.os }}-clojure-${{ hashFiles('**/deps.edn') }}
         restore-keys: |
           ${{ runner.os }}-clojure
+
+    - name: Run CI
+      run: clojure -T:build ci
+    

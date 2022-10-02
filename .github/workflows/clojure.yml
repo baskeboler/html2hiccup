@@ -43,4 +43,4 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: Artifacts-V3
-        path: ~/target/html2hiccup*.jar
+        path: target/html2hiccup*.jar

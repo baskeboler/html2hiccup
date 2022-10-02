@@ -1,4 +1,5 @@
 # html2hiccup
+[![Clojure CI](https://github.com/baskeboler/html2hiccup/actions/workflows/clojure.yml/badge.svg)](https://github.com/baskeboler/html2hiccup/actions/workflows/clojure.yml)
 
 convert html snippets to hiccup with ease 
 

@@ -40,4 +40,7 @@ jobs:
         echo "SemVer: $GITVERSION_SEMVER"
     - name: Run CI
       run: clojure -T:build ci
-      
+    - uses: actions/upload-artifact@v3
+      with:
+        name: Artifacts-V3
+        path: ~/target/html2hiccup*.jar

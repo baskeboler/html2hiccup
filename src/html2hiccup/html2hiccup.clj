@@ -1,34 +1,50 @@
 (ns html2hiccup.html2hiccup
-  (:require [seesaw.border :as sb]
+  (:require [clojure.pprint :as pprint]
+            [clojure.string :as string] 
             [seesaw.core :as s :refer [config config! frame menu menu-item
                                        menubar pack! separator show!
                                        vertical-panel]]
-            [taipei-404.html :refer [html->hiccup minify-hiccup]]
-            [clojure.pprint :as pprint])
+            [taipei-404.html :refer [html->hiccup minify-hiccup]])
   (:import [org.fife.ui.rsyntaxtextarea RSyntaxTextArea]
            [org.fife.ui.rtextarea RTextScrollPane])
   (:gen-class))
 
-(declare clear-html clear-result)
+(declare clear-html clear-result f)
 
 (s/native!)
 
-(defn read-stdin []
-  (slurp *in*))
 
-(def f (frame :title "html 2 hiccup"
-              :menubar (menubar :items [(menu :text "File"
-                                              :items [(menu-item :text "Open")
-                                                      (separator)
-                                                      (menu-item :text "Exit")])
-                                        (menu :text "Edit"
-                                              :items [(menu-item :text "Clear HTML"
-                                                                 :listen [:action #(clear-html)])
-                                                      (menu-item :text "Clear Result"
-                                                                 :listen [:action #(clear-result)])])])))
+(defn- create-app-frame []
+  (frame :title "html 2 hiccup"
+              :menubar
+              (menubar :items
+                       [(menu :text "File"
+                              :items [(menu-item
+                                       :text "Open")
+                                      (separator)
+                                      (menu-item
+                                       :text "Exit"
+                                       :listen [:action (fn [_] 
+                                                          (s/invoke-now
+                                                           (s/dispose! @f)))])])
+                        (menu :text "Edit"
+                              :items [(menu-item
+                                       :text "Clear HTML"
+                                       :listen [:action  (fn [_]
+                                                           (s/invoke-now
+                                                            (clear-html)))])
+                                      (menu-item
+                                       :text "Clear Result"
+                                       :listen [:action  (fn [_]
+                                                           (s/invoke-now
+                                                            (clear-result)))])])])))
+
+
+
+(def f (atom (create-app-frame)))
 
 (defn display [content]
-  (config! f 
+  (config! @f
            :content content
            :on-close :exit)
   content)
@@ -39,57 +55,53 @@
    :clojure RSyntaxTextArea/SYNTAX_STYLE_CLOJURE})
 
 (defn syntax-area [syntax]
-  (doto (RSyntaxTextArea. 20 60)
-    (.setSyntaxEditingStyle (get available-syntaxes syntax))
-    (.setCodeFoldingEnabled true)
-    (.setAutoIndentEnabled true)
-    (.setLineWrap true)))
+  (s/make-widget
+   (doto (RSyntaxTextArea. 20 60)
+     (.setSyntaxEditingStyle (get available-syntaxes syntax))
+     (.setCodeFoldingEnabled true)
+     (.setAutoIndentEnabled true)
+     (.setLineWrap true))))
 
 (def html-area (syntax-area :html))
 
 (def clojure-area (syntax-area :clojure))
- 
+
 (defn code-pane [title area]
-  (s/vertical-panel 
-   :items [(s/label :text title
-                    :h-text-position :center
-                    :font "ARIAL-BOLD-24"
-                    :halign :left
-                    :border (sb/line-border  :color :red))
+  (vertical-panel
+   :items [title
+           #_(s/label
+              :text title
+              :h-text-position :left
+              :font "ARIAL-BOLD-24"
+              :border (s/line-border  :color :red))
            (RTextScrollPane. area)]))
 
 
-(def html-clojure-split-area 
+(def html-clojure-split-area
   (s/top-bottom-split (code-pane "html" html-area)
                       (code-pane "hiccup" clojure-area)
                       :divider-location 1/3))
-
-(def line-break "
-")
 
 (defn code-handler [e]
   (let [t  (-> e .getSource (config :text) string/trim)
         converted (-> t
                       html->hiccup
-                      first 
+                      first
                       minify-hiccup
-                      (clojure.pprint/write :stream nil)
-                      ;; h/parse-fragment
-                      ;; first
-                      ;; h/as-hiccup
-                      ;; str
-                      ;; (string/replace #"\"\\n+ *\"" "")
-                      ;; str
-                      )]
+                      (clojure.pprint/write :stream nil))
+        converted (if (= converted "nil")
+                    ""
+                    converted)]
     (println "selection: " t)
     (println "converted: " converted)
-    (-> clojure-area (.setText converted))))
+    (-> clojure-area 
+        (.setText (or  converted "")))))
 
-(defn clear-result [] 
+(defn clear-result []
   (-> clojure-area (.setText "")))
 
 (defn clear-html []
-  (-> html-area 
+  (-> html-area
       (.setText "")))
 
 
@@ -97,8 +109,8 @@
           :selection
           code-handler)
 
-(defn  show-frame [] 
-  (-> f pack! show!))
+(defn  show-frame []
+  (-> @f pack! show! s/move-to-front!))
 
 (defn gui []
   (display html-clojure-split-area)
@@ -109,16 +121,23 @@
   [& args]
   (gui)
   #_(let [input (read-stdin)
-        output (h/parse  input)] 
-    (->> output
-         h/as-hiccup
-         (drop-while #(not= :html (first %)))
-         first
-         pp/pprint)))
+          output (h/parse  input)]
+      (->> output
+           h/as-hiccup
+           (drop-while #(not= :html (first %)))
+           first
+           pp/pprint)))
 
-(comment 
+(defn reset-frame! []
+  (s/config! @f :on-close :hide)
+  (s/dispose! @f)
+  (reset! f (create-app-frame))
+  (gui))
+
+(comment
+  (swap! f #(s/config! % :on-close :hide))
   (gui)
-  
-  
-  (seesaw.core/dispose! f)
-  )
+
+  (reset-frame!)
+
+  (seesaw.core/dispose! @f))

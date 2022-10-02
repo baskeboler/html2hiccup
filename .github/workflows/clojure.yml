@@ -24,7 +24,7 @@ jobs:
       with:
         cli: latest
         # Set to `true` to fix problems realted to wrongly populated tool cache
-        invalidate-cache: true
+        # invalidate-cache: true
     - name: Cache maven project dependencies
       uses: actions/cache@v3
       with:

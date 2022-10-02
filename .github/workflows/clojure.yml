@@ -2,33 +2,25 @@ name: Clojure CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "dev"]
   pull_request:
     branches: [ "master" ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
+      with: 
+        fetch-depth: 0
     - name: Setup Clojure
       # You may pin to the exact commit or the version.
       # uses: DeLaGuardo/setup-clojure@05cb4bfdf57855f122e75b71e45224775cdfc4a0
       uses: DeLaGuardo/setup-clojure@9.5
       with:
-        tools-deps: latest
-        # Clojure CLI version to make available on the path.
         cli: latest
-        # zprint version to install, `latest` can be used.
-        zprint: latest
-        # To fix rate limit errors, provide `secrets.GITHUB_TOKEN` value to this field. More info: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
-
-        # github-token: # optional, default is ${{ github.token }}
         # Set to `true` to fix problems realted to wrongly populated tool cache
-
-        # invalidate-cache: # optional
+        invalidate-cache: true
     - name: Run CI
       run: clojure -T:build ci
     - name: Git Version

@@ -2,6 +2,7 @@
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         seesaw/seesaw {:mvn/version "1.5.0"}
         org.clojure/core.async {:mvn/version "1.5.648"}
+
         com.fifesoft/rsyntaxtextarea {:mvn/version "3.2.0"}
         taipei.404/html-to-hiccup {:mvn/version "0.1.8"}}
  :aliases

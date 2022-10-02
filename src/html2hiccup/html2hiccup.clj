@@ -5,11 +5,13 @@
                                        menubar pack! separator show!
                                        vertical-panel]]
             [taipei-404.html :refer [html->hiccup minify-hiccup]])
+
   (:import [org.fife.ui.rsyntaxtextarea RSyntaxTextArea]
            [org.fife.ui.rtextarea RTextScrollPane])
   (:gen-class))
 
 (declare clear-html clear-result f)
+
 
 (s/native!)
 
@@ -45,6 +47,7 @@
 
 (defn display [content]
   (config! @f
+
            :content content
            :on-close :exit)
   content)
@@ -62,6 +65,7 @@
      (.setAutoIndentEnabled true)
      (.setLineWrap true))))
 
+
 (def html-area (syntax-area :html))
 
 (def clojure-area (syntax-area :clojure))
@@ -74,6 +78,7 @@
               :h-text-position :left
               :font "ARIAL-BOLD-24"
               :border (s/line-border  :color :red))
+
            (RTextScrollPane. area)]))
 
 
@@ -141,3 +146,4 @@
   (reset-frame!)
 
   (seesaw.core/dispose! @f))
+

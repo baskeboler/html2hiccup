@@ -52,9 +52,9 @@ If you remove `version` from `build.clj`, the uberjar will become `target/html2h
 
 FIXME: listing of options this app accepts.
 
-## Examples
+## Screenshots
 
-...
+![alt](doc/images/screenshot.png)
 
 ### Bugs
 
